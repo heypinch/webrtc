@@ -49,7 +49,7 @@ type PeerConnection struct {
 	negotiationNeeded            bool
 	nonTrickleCandidatesSignaled *atomicBool
 
-	lastOffer  string
+	LastOffer  string
 	lastAnswer string
 
 	// a value containing the last known greater mid value
@@ -104,7 +104,7 @@ func (api *API) NewPeerConnection(configuration Configuration) (*PeerConnection,
 		isClosed:                     &atomicBool{},
 		negotiationNeeded:            false,
 		nonTrickleCandidatesSignaled: &atomicBool{},
-		lastOffer:                    "",
+		LastOffer:                    "",
 		lastAnswer:                   "",
 		greaterMid:                   -1,
 		signalingState:               SignalingStateStable,
@@ -468,7 +468,7 @@ func (pc *PeerConnection) CreateOffer(options *OfferOptions) (SessionDescription
 		SDP:    string(sdpBytes),
 		parsed: d,
 	}
-	pc.lastOffer = desc.SDP
+	pc.LastOffer = desc.SDP
 	return desc, nil
 }
 
@@ -622,7 +622,7 @@ func (pc *PeerConnection) setDescription(sd *SessionDescription, op stateChangeO
 			switch sd.Type {
 			// stable->SetLocal(offer)->have-local-offer
 			case SDPTypeOffer:
-				if sd.SDP != pc.lastOffer {
+				if sd.SDP != pc.LastOffer {
 					return nextState, newSDPDoesNotMatchOffer
 				}
 				nextState, err = checkNextSignalingState(cur, SignalingStateHaveLocalOffer, setLocal, sd.Type)
@@ -719,7 +719,7 @@ func (pc *PeerConnection) SetLocalDescription(desc SessionDescription) error {
 		case SDPTypeAnswer, SDPTypePranswer:
 			desc.SDP = pc.lastAnswer
 		case SDPTypeOffer:
-			desc.SDP = pc.lastOffer
+			desc.SDP = pc.LastOffer
 		default:
 			return &rtcerr.InvalidModificationError{
 				Err: fmt.Errorf("invalid SDP type supplied to SetLocalDescription(): %s", desc.Type),
